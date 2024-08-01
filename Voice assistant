@@ -1,0 +1,88 @@
+import pyttsx3
+import speech_recognition as sr
+import datetime
+import webbrowser
+
+engine = pyttsx3.init()
+
+rate = engine.getProperty('rate')
+engine.setProperty('rate',130)
+voices = engine.getProperty('voices')
+engine.setProperty('voice',voices[1].id)
+engine.runAndWait()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def greetings():
+    hour = datetime.datetime.now().hour
+    if 0 <= hour < 12:
+        return "Good morning"
+    elif 12 <= hour < 18:
+        return "Good afternoon"
+    else:
+        return "Good evening"
+
+def take_command():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        r.energy_threshold = 1000
+        r.adjust_for_ambient_noise(source,duration=1.2)
+        print("Listening...")
+        audio = r.listen(source)
+    
+
+    try:  
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+    except Exception as e:
+        print(e)
+        print("Say that again please...")
+        return "None"
+    return query
+
+def get_date_time():
+    now = datetime.datetime.now()
+    return now.strftime("%Y-%m-%d %H:%M:%S")
+
+def main():
+    speak(greetings())
+    speak("hii there. I'am sweety!.i'am your virtual assistant")
+    speak("how are you")
+    user_response = take_command().lower()
+    if "good" in user_response or "fine" in user_response or "great" in user_response:
+        speak("I'am glad to hear that")
+    else:
+        speak("I hope things get better")    
+
+    
+    speak("How can i help you today")
+
+
+    while True:
+        query = take_command().lower()
+
+        if 'date' in query or 'time' in query:
+            current_time = get_date_time()
+            speak(f"The current date and time is {current_time}") 
+        
+        elif 'information' in query or 'search' in query:
+            speak("What do you want to search for?")
+            search_query = take_command().lower()
+            webbrowser.open(f"https://www.google.com/search?q={search_query}")
+            speak(f"Here are the results for {search_query}")
+        
+        elif 'video' in query or 'play' in query:
+            speak("What video do you want to play?")
+            video_query = take_command().lower()
+            webbrowser.open(f"https://www.youtube.com/results?search_query={video_query}")
+            speak(f"Playing {video_query} on YouTube")
+
+        elif 'exit' in query or 'quit' in query or 'stop' in query:
+            speak("Goodbye")
+            break
+
+if __name__ == "__main__":
+    main()
